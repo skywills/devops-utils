@@ -1,0 +1,30 @@
+# nginx ingress slb service
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-ingress-lb
+  namespace: kube-system
+  labels:
+    app: nginx-ingress-lb
+  annotations:
+    service.beta.kubernetes.io/alibaba-cloud-loadbalancer-instance-charge-type: "PayByCLCU"
+    # # 指明SLB实例地址类型为私网类型。
+    #service.beta.kubernetes.io/alicloud-loadbalancer-address-type: intranet
+    # 修改为您的私网SLB实例ID。
+    #service.beta.kubernetes.io/alicloud-loadbalancer-id: lb-3nsteya4tv8o94qhb5gg1
+    # 是否自动创建SLB端口监听（会覆写已有端口监听），也可手动创建端口监听。
+    #service.beta.kubernetes.io/alicloud-loadbalancer-force-override-listeners: 'true'
+spec:
+  type: LoadBalancer
+  # route traffic to other nodes
+  externalTrafficPolicy: "Cluster"
+  ports:
+  - port: 80
+    name: http
+    targetPort: 80
+  - port: 443
+    name: https
+    targetPort: 443
+  selector:
+    # select app=ingress-nginx pods
+    app: ingress-nginx
