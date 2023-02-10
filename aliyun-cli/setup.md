@@ -29,3 +29,7 @@
 1.) example: `aliyun ecs DescribeInstances --output cols=InstanceId,InstanceName,PublicIpAddress,NetworkInterfaces.NetworkInterface[].PrimaryIpAddress,Status rows=Instances.Instance[]`
 
 https://blog.csdn.net/yunweigo/article/details/116126850
+
+
+## Alias command
+https://github.com/aliyun/aliyun-cli/blob/master/bin/README.md

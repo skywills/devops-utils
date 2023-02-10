@@ -19,4 +19,9 @@
 
 ## Delete SecurityGroup
 
-1.) `aliyun ecs DeleteSecurityGroup --SecurityGroupId=sgr-****`
+1.) `aliyun ecs DeleteSecurityGroup --SecurityGroupId=sg-****`
+
+
+## Revoke SecurityGroup Rule
+
+1.) required to match protocol, port range, and SourceCidrIp `aliyun ecs RevokeSecurityGroup --SecurityGroupId=sg-****** --IpProtocol=tcp --PortRange=53/53 --SourceCidrIp=127.0.0.1`
