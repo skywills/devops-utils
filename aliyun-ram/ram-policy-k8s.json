@@ -1,0 +1,18 @@
+{
+  "Statement": [
+    {
+      "Action": [
+        "cs:Get*",
+        "cs:List*",
+        "cs:Describe*",
+        "cs:ScaleCluster",
+        "cs:DeleteCluster"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "acs:cs:*:*:cluster/集群ID"
+      ]
+    }
+  ],
+  "Version": "1"
+}
