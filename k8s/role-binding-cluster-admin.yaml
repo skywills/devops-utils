@@ -1,0 +1,33 @@
+## Allows super-user access to perform any action on any resource.
+## When used in a ClusterRoleBinding, it gives full control over every resource in the cluster and in all namespaces. 
+## When used in a RoleBinding, it gives full control over every resource in the role binding's namespace, including the namespace itself.
+
+## Role: cluster-admin, admin
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: wk-cluster-admin-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: williamkhoo@wk-aliyun
+
+## allow access to specified namespace, if namespace not specified, then is default namespace
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: wk-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: williamkhoo@wk-aliyun
