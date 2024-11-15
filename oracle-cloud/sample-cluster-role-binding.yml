@@ -1,0 +1,24 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  creationTimestamp: "2024-11-15T13:10:34Z"
+  managedFields:
+  - apiVersion: rbac.authorization.k8s.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:roleRef: {}
+      f:subjects: {}
+    manager: kubectl-create
+    operation: Update
+    time: "2024-11-15T13:10:34Z"
+  name: test-on-cluster-admin
+  resourceVersion: "78310"
+  uid: 5f47c6fe-be24-4dde-a8de-2c03c36b747b
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: emesh-ci-bot
+  namespace: kube-system
