@@ -1,5 +1,5 @@
 ARG NODE_VERSION=18.20.2
-FROM node:${NODE_VERSION}-alpine3.18 as node-builder
+FROM node:${NODE_VERSION}-alpine3.18 AS node-builder
 
 FROM alpine:3.18 AS build
 
