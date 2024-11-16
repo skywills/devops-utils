@@ -1,4 +1,5 @@
 https://me.mattscott.cloud/kubernetes-on-oracle-cloud-for-free/
+https://me.mattscott.cloud/exposing-services-three-ways/
 
 
 ## it is good to use service account to run for kubeconfig for OCI k8s
