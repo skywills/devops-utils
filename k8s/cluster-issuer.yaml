@@ -1,0 +1,28 @@
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: nathapp-letsencrypt
+spec:
+  acme:
+    email: williamkhoo@nathapp.com
+    preferredChain: ""
+    privateKeySecretRef:
+      name: cluster-issuer-account-key
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+    - dns01:
+        cloudflare:
+          apiTokenSecretRef:
+            key: api-token
+            name: cloudflare-api-token
+          email: williamkhoo@nathapp.com
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudflare-api-token
+type: Opaque
+stringData:
+  api-token: <API Token>
