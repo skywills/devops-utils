@@ -1,5 +1,5 @@
 ARG NODE_MAJOR_VERSION=18
-FROM node:${NODE_MAJOR_VERSION}-bullseye-slim as node-builder
+FROM node:${NODE_MAJOR_VERSION}-bullseye-slim AS node-builder
 
 FROM debian:bullseye-slim AS build
 
