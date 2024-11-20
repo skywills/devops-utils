@@ -1,8 +1,7 @@
-FROM alpine:3.18
+ARG VERSION=3.18
+FROM alpine:${VERSION}
 
-RUN apk update \
- && apk add jq \
- && rm -rf /var/cache/apk/*
+RUN apk update && apk --no-cache add jq
 
 RUN mkdir /app
 WORKDIR /app
