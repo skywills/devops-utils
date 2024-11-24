@@ -4,3 +4,20 @@ managerRbac:
   namespaces:
   - dev
   - staging
+
+## https://www.telepresence.io/docs/install/manager#namespace-scoped-user-permissions
+clientRbac:
+  create: true
+
+  # These are the users or groups to which the user rbac will be bound.
+  # This MUST be set.
+  subjects: {}
+  # - kind: User
+  #   name: jane
+  #   apiGroup: rbac.authorization.k8s.io
+
+  namespaced: true
+
+  namespaces:
+  - dev
+  - staging    
