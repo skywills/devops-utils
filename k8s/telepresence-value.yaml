@@ -1,0 +1,6 @@
+managerRbac:
+  create: true
+  namespaced: true
+  namespaces:
+  - dev
+  - staging
