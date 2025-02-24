@@ -1,7 +1,8 @@
 ARG NODE_VERSION=18.20.2
-FROM node:${NODE_VERSION}-alpine3.18 AS node-builder
+ARG ALPINE_VERSION=3.21
+FROM node:${NODE_VERSION}-alpine${ALPINE_VERSION} AS node-builder
 
-FROM alpine:3.18 AS build
+FROM alpine:${ALPINE_VERSION} AS build
 
 # https://github.com/oven-sh/bun/releases
 ARG BUN_VERSION=latest
