@@ -13,6 +13,7 @@ helm upgrade --install \
 ```
 
 # create cluster issuer
+## Cloudflare
 ```
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -36,6 +37,22 @@ spec:
             name: cloudflare-api-token
           email: williamkhoo@nathapp.com
 ```
+## ingress solver
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    email: williamkhoo@nathapp.com
+    preferredChain: ""
+    privateKeySecretRef:
+      name: cluster-issuer-account-key
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
 
 https://ruanbekker.hashnode.dev/cert-manager-dns-challenge-with-cloudflare-on-kubernetes
 
