@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-prv-forward
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: mysql-prv-forward
+  serviceName: mysql-prv-forward
+  podManagementPolicy: Parallel
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mysql-prv-forward
+      annotations:
+        kubernetes.io/change-cause: release-1
+    spec:
+      containers:
+      - name: mysql-prv-forward
+        image: nginx:stable-alpine
+        imagePullPolicy: IfNotPresent
+        command:
+          # - /bin/sleep
+          # - 365d
+          - /startup-scripts/startup.sh
+        ports:
+        - containerPort: 3306
+        env:
+        - name: SOURCE_PORT
+          value: "3306"
+        - name: DEST
+          value: "<mysql-url>"
+        - name: DEST_PORT
+          value: "3306"
+        volumeMounts:
+        - name: script-volume
+          mountPath: /startup-scripts/
+          readOnly: true
+        - name: template-volume
+          mountPath: /etc/nginx/template/
+      terminationGracePeriodSeconds: 10
+      volumes:
+        - name: script-volume
+          configMap:
+            name: mysql-prv-forward
+            defaultMode: 0777
+            items:
+            - key: startup.sh
+              path: startup.sh
+        - name: template-volume
+          configMap:
+            name: mysql-prv-forward
+            items:
+            - key: nginx.conf.template
+              path: nginx.conf.template
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-prv-forward
+  namespace: default
+spec:
+  selector:
+    app: mysql-prv-forward
+  ports:
+    - name: "http"
+      port: 3306
+      targetPort: 3306
+      protocol: TCP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-prv-forward
+  namespace: default
+data:
+  startup.sh: |
+    #!/bin/sh
+    envsubst < /etc/nginx/template/nginx.conf.template > /etc/nginx/nginx.conf
+    nginx -g 'daemon off;'
+
+  nginx.conf.template: |
+    user  nginx;
+    worker_processes  auto;
+
+    error_log  /var/log/nginx/error.log warn;
+    pid        /var/run/nginx.pid;
+
+
+    events {
+        worker_connections  1024;
+    }
+
+
+    http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+
+        log_format  main  ' -  [] "" '
+                          '  "" '
+                          '"" ""';
+
+        access_log  /var/log/nginx/access.log  main;
+
+        sendfile        on;
+        #tcp_nopush     on;
+
+        keepalive_timeout  65;
+
+        #gzip  on;
+    }
+
+    stream {
+        # ...
+        server {
+            listen            $SOURCE_PORT;
+            proxy_pass        $DEST:$DEST_PORT;
+            proxy_buffer_size 32k;
+        }
+    }
