@@ -7,3 +7,8 @@ docker build --build-arg BUN_VERSION=1.1.7 \
 docker build --build-arg BUN_VERSION=1.1.7 \
              --build-arg NODE_MAJOR_VERSION=20 \
              -t nathapp/node-bun:20-1.1.7-distroless .
+
+
+docker build --build-arg BUN_VERSION=1.3.1 \
+             --build-arg NODE_MAJOR_VERSION=22 \
+             -t nathapp/node-bun:22-1.3.1-distroless .             
