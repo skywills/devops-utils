@@ -38,3 +38,25 @@ kubectl get pods -A -o jsonpath='{range .items[?(@.spec.nodeSelector)]}{.metadat
 ```
 kubectl get pods -A -o jsonpath='{range .items[?(@.spec.nodeSelector)]}{.metadata.namespace}{"\t"}{.metadata.name}{"\t"}{.spec.nodeSelector}{"\n"}{end}'
 ```
+
+
+### to check pod using hostPath
+```
+kubectl get pods -A -o json | jq -r '.items[]
+  | select(.spec.volumes != null)
+  | select(any(.spec.volumes[]; has("hostPath")))
+  | [.metadata.namespace, .metadata.name, (.spec.volumes[] | select(has("hostPath")).name), (.spec.volumes[] | select(has("hostPath")).hostPath.path)]
+  | @tsv'
+```
+
+```
+kubectl get pods -A -o json | jq -r '.items[] | select(any(.spec.volumes[]?; has("hostPath"))) | [.metadata.namespace, .metadata.name] | @tsv'
+```
+
+```
+kubectl get deploy,ds,sts -A -o json | jq -r '.items[]
+  | select(.spec.template.spec.volumes != null)
+  | select(any(.spec.template.spec.volumes[]; has("hostPath")))
+  | [.kind, .metadata.namespace, .metadata.name, (.spec.template.spec.volumes[] | select(has("hostPath")).hostPath.path)]
+  | @tsv'
+```
