@@ -57,3 +57,10 @@ docker buildx build --platform linux/amd64,linux/arm64 \
              --build-arg NODE_VERSION=22.21.0 \
              --build-arg ALPINE_VERSION=3.22 \
              -t nathapp/node-bun:22.21.0-1.3.9-alpine .             
+
+
+docker buildx build --platform linux/amd64,linux/arm64 \
+             --build-arg BUN_VERSION=1.3.13 \
+             --build-arg NODE_VERSION=24.16.0 \
+             --build-arg ALPINE_VERSION=3.22 \
+             -t nathapp/node-bun:24.16.0-1.3.13-alpine .                 
