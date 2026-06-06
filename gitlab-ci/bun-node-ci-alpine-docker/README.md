@@ -16,3 +16,13 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 docker buildx build --platform linux/amd64,linux/arm64 \
 --build-arg VERSION=22.21.0 --build-arg BUN_VERSION=1.2.23 . -t registry-intl.cn-hongkong.aliyuncs.com/gkci/bun-node:22.21.0-1.2.23-alpine-ci
 ```
+
+```
+docker buildx build --platform linux/amd64,linux/arm64 \
+--build-arg VERSION=22.21.0 --build-arg BUN_VERSION=1.3.9 . -t registry-intl.cn-hongkong.aliyuncs.com/gkci/bun-node:22.21.0-1.3.9-alpine-ci
+```
+
+```
+docker buildx build --platform linux/amd64,linux/arm64 \
+--build-arg VERSION=24.16.0 --build-arg BUN_VERSION=1.3.13 . -t registry-intl.cn-hongkong.aliyuncs.com/gkci/bun-node:24.16.0-1.3.13-alpine-ci
+```
