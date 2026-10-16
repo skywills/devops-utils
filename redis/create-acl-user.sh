@@ -25,7 +25,7 @@ while getopts 'u:p:k:nh' opt; do
         p) password="$OPTARG" ;;
         k) keys="$OPTARG" ;;
         n) save=false ;;
-        h) sed -n '2,20p' "$0"; exit 0 ;;
+        h) sed -n '2,18p' "$0"; exit 0 ;;
         *) exit 2 ;;
     esac
 done

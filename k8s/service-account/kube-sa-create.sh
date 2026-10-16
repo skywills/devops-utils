@@ -28,7 +28,7 @@ while getopts 'r:s:n:t:c:o:yh' opt; do
         c) cluster="$OPTARG" ;;
         o) out="$OPTARG" ;;
         y) assume_yes=true ;;
-        h) sed -n '2,17p' "$0"; exit 0 ;;
+        h) sed -n '2,16p' "$0"; exit 0 ;;
         *) exit 2 ;;
     esac
 done

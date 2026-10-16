@@ -25,7 +25,7 @@ while getopts 'd:u:p:H:sh' opt; do
         p) password="$OPTARG" ;;
         H) host="$OPTARG" ;;
         s) require_ssl=true ;;
-        h) sed -n '2,19p' "$0"; exit 0 ;;
+        h) sed -n '2,17p' "$0"; exit 0 ;;
         *) exit 2 ;;
     esac
 done
