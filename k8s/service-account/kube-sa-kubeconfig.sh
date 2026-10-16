@@ -2,8 +2,11 @@
 # Write a kubeconfig for an existing ServiceAccount (for k9s or CI).
 # Uses the current kubectl context to read the cluster address and CA.
 #
-# Usage: kube-sa-kubeconfig.sh -s sa-name -n namespace [-t secret|DURATION]
+# Usage: kube-sa-kubeconfig.sh -s sa-name -n namespace [-N context-namespace] [-t secret|DURATION]
 #                              [-c cluster-name] [-o out-file | -o -]
+#   -n  namespace the ServiceAccount (and its token Secret) lives in
+#   -N  default namespace of the kubeconfig context, and where access is checked
+#       (default: -n). Set it when the account administers another namespace.
 #   -t  "secret" (default) = read the long-lived token Secret <sa>-token,
 #       or a duration like 24h = mint a short-lived token with `kubectl create token`
 #   -c  cluster name used inside the kubeconfig (default: current context's cluster)
@@ -12,15 +15,16 @@
 # Then: k9s --kubeconfig <file>   or   KUBECONFIG=<file> kubectl get pods
 set -euo pipefail
 
-sa='' namespace='' token=secret cluster='' out=''
-while getopts 's:n:t:c:o:h' opt; do
+sa='' namespace='' ctx_namespace='' token=secret cluster='' out=''
+while getopts 's:n:N:t:c:o:h' opt; do
     case "$opt" in
         s) sa="$OPTARG" ;;
         n) namespace="$OPTARG" ;;
+        N) ctx_namespace="$OPTARG" ;;
         t) token="$OPTARG" ;;
         c) cluster="$OPTARG" ;;
         o) out="$OPTARG" ;;
-        h) sed -n '2,12p' "$0"; exit 0 ;;
+        h) sed -n '2,15p' "$0"; exit 0 ;;
         *) exit 2 ;;
     esac
 done
@@ -28,6 +32,7 @@ done
 die() { echo "error: $*" >&2; exit 1; }
 
 [ -n "$sa" ] && [ -n "$namespace" ] || die "-s and -n are required (see -h)"
+[ -n "$ctx_namespace" ] || ctx_namespace="$namespace"
 [[ "$token" = secret || "$token" =~ ^[0-9]+[smh]$ ]] || die "-t must be 'secret' or a duration like 24h"
 
 server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
@@ -64,7 +69,7 @@ contexts:
   - name: ${context_name}
     context:
       cluster: ${cluster}
-      namespace: ${namespace}
+      namespace: ${ctx_namespace}
       user: ${sa}
 users:
   - name: ${sa}
@@ -83,10 +88,10 @@ fi
 chmod 600 "$out"
 
 # Prove the credentials work before handing them out.
-if KUBECONFIG="$out" kubectl auth can-i get pods -n "$namespace" >/dev/null 2>&1; then
-    check="ok"
+if KUBECONFIG="$out" kubectl auth can-i get pods -n "$ctx_namespace" >/dev/null 2>&1; then
+    check="ok (can get pods in $ctx_namespace)"
 else
-    check="FAILED (token cannot get pods in $namespace)"
+    check="FAILED (token cannot get pods in $ctx_namespace)"
 fi
 echo "Wrote $out (mode 600) - access check: $check"
 echo "Open with: k9s --kubeconfig $out"
