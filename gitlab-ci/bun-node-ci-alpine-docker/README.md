@@ -26,3 +26,8 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 docker buildx build --platform linux/amd64,linux/arm64 \
 --build-arg VERSION=24.16.0 --build-arg BUN_VERSION=1.3.13 . -t registry-intl.cn-hongkong.aliyuncs.com/gkci/bun-node:24.16.0-1.3.13-alpine-ci
 ```
+Docker Hub (used by the na-cli nestjs-api / nestjs-library CI templates). Build after `nathapp/node-bun:24.22.0-1.4.3-alpine` is pushed:
+```
+docker buildx build --platform linux/amd64,linux/arm64 \
+--build-arg VERSION=24.22.0 --build-arg BUN_VERSION=1.4.3 . -t nathapp/node-bun:24.22.0-1.4.3-alpine-ci --push
+```
