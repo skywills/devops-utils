@@ -37,7 +37,9 @@ die() { echo "error: $*" >&2; exit 1; }
 [[ "$user" =~ ^[A-Za-z0-9_]{1,32}$ ]] || die "user name may only use letters, digits and _ (max 32)"
 [[ "$host" =~ ^[A-Za-z0-9_.%-]+$ ]] || die "invalid host pattern: $host"
 if [ -z "$password" ]; then
-    password="$(LC_ALL=C tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32)"
+    # Read a fixed byte count first: `tr < /dev/urandom | head` gets SIGPIPE, which pipefail turns
+    # into a failed command substitution.
+    password="$(head -c 256 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9' | cut -c1-32)"
 fi
 [[ "$password" =~ ^[A-Za-z0-9_@#%+=.,:-]{12,}$ ]] || die "password must be 12+ chars without quotes, spaces or backslashes"
 

@@ -12,7 +12,8 @@
 #   -k  allowed key pattern (default: *). Redis ACLs cannot restrict a logical DB
 #       (SELECT n), so isolate apps with a key prefix (-k 'app:*') or by convention
 #       on the DB index.
-#   -n  do not append ACL SAVE (when the server has no aclfile configured)
+#   -n  do not append ACL SAVE. Use it when users live inline in redis.conf (no aclfile):
+#       ACL SAVE fails there, so persist with `redis-cli CONFIG REWRITE` afterwards.
 #
 # Re-running resets the user (ACL SETUSER ... reset) to exactly these rules.
 set -euo pipefail
@@ -24,7 +25,7 @@ while getopts 'u:p:k:nh' opt; do
         p) password="$OPTARG" ;;
         k) keys="$OPTARG" ;;
         n) save=false ;;
-        h) sed -n '2,19p' "$0"; exit 0 ;;
+        h) sed -n '2,20p' "$0"; exit 0 ;;
         *) exit 2 ;;
     esac
 done
@@ -36,7 +37,9 @@ die() { echo "error: $*" >&2; exit 1; }
 [ "$user" != default ] || die "refusing to modify the default user"
 [[ "$keys" =~ ^[A-Za-z0-9_:*.{}-]+$ ]] || die "invalid key pattern: $keys"
 if [ -z "$password" ]; then
-    password="$(LC_ALL=C tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32)"
+    # Read a fixed byte count first: `tr < /dev/urandom | head` gets SIGPIPE, which pipefail turns
+    # into a failed command substitution.
+    password="$(head -c 256 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9' | cut -c1-32)"
 fi
 [[ "$password" =~ ^[A-Za-z0-9_@#%+=.,:-]{12,}$ ]] || die "password must be 12+ chars without quotes, spaces or backslashes"
 
