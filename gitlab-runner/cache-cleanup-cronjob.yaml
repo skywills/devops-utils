@@ -1,0 +1,108 @@
+# Scheduled disk cleanup for the home k3s node (k3s-master01).
+#
+# The GitLab runners (nathapp, iot-system, emesh, home) mount the node's /tmp
+# as /cache, so the local CI cache (/tmp/<group>/<project>/<key>/cache.zip)
+# grows without bound. homelab-buildkitd keeps its layer cache on the node
+# disk (/mnt/buildkitd/cache) with no GC limit.
+#
+# Apply: kubectl --context subrina-sa@cluster-home apply -f cache-cleanup-cronjob.yaml
+# Run now: kubectl -n kube-ci create job --from=cronjob/runner-cache-cleanup runner-cache-cleanup-manual
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: runner-cache-cleanup
+  namespace: kube-ci
+spec:
+  schedule: "30 3 * * *"
+  timeZone: Asia/Kuala_Lumpur
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 604800
+      template:
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          containers:
+            - name: cleanup
+              image: docker.io/library/alpine:3.20
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: MAX_AGE_DAYS
+                  value: "7"
+                # Above this root-disk usage (%), drop anything older than 1 day.
+                - name: PRESSURE_PERCENT
+                  value: "80"
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  root=/host-tmp
+                  used=$(df -P "$root" | awk 'NR==2 {gsub("%", "", $5); print $5}')
+                  age=$MAX_AGE_DAYS
+                  if [ "$used" -ge "$PRESSURE_PERCENT" ]; then age=1; fi
+                  echo "disk ${used}% used, removing cache.zip older than ${age}d"
+                  # Only walk runner group dirs (/tmp/<group>); never systemd/snap
+                  # private tmp dirs, whose empty subdirs are live bind mounts.
+                  find "$root" -mindepth 1 -maxdepth 1 -type d \
+                    ! -name 'systemd-private-*' ! -name 'snap-private-tmp' ! -name '.*' |
+                  while read -r group; do
+                    find "$group" -type f -name cache.zip -mtime "+$age" -print -delete
+                    find "$group" -mindepth 1 -type d -empty -print -delete
+                  done
+                  df -h "$root"
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  memory: 64Mi
+              volumeMounts:
+                - name: host-tmp
+                  mountPath: /host-tmp
+          volumes:
+            - name: host-tmp
+              hostPath:
+                path: /tmp
+                type: Directory
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: buildkit-cache-prune
+  namespace: kube-ci
+spec:
+  schedule: "45 3 * * *"
+  timeZone: Asia/Kuala_Lumpur
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 604800
+      template:
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          containers:
+            - name: prune
+              # Same tag as homelab-buildkitd so client and daemon match.
+              image: docker.io/moby/buildkit:master-rootless
+              imagePullPolicy: IfNotPresent
+              command: ["buildctl"]
+              args:
+                - --addr=tcp://homelab-buildkitd.homelab.svc.cluster.local:1234
+                - prune
+                - --keep-duration=168h
+                - --keep-storage=3000
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  memory: 64Mi
