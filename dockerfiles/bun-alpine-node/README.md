@@ -70,3 +70,23 @@ docker buildx build --platform linux/amd64,linux/arm64 \
              --build-arg NODE_VERSION=24.22.0 \
              --build-arg ALPINE_VERSION=3.24 \
              -t nathapp/node-bun:24.22.0-1.4.3-alpine --push .
+
+
+## bun 1.4.4 on the 2026-10-20/21 Node.js security releases (26.12.1 / 24.22.1 / 22.23.4)
+docker buildx build --platform linux/amd64,linux/arm64 \
+             --build-arg BUN_VERSION=1.4.4 \
+             --build-arg NODE_VERSION=26.12.1 \
+             --build-arg ALPINE_VERSION=3.24 \
+             -t nathapp/node-bun:26.12.1-1.4.4-alpine --push .
+
+docker buildx build --platform linux/amd64,linux/arm64 \
+             --build-arg BUN_VERSION=1.4.4 \
+             --build-arg NODE_VERSION=24.22.1 \
+             --build-arg ALPINE_VERSION=3.24 \
+             -t nathapp/node-bun:24.22.1-1.4.4-alpine --push .
+
+docker buildx build --platform linux/amd64,linux/arm64 \
+             --build-arg BUN_VERSION=1.4.4 \
+             --build-arg NODE_VERSION=22.23.4 \
+             --build-arg ALPINE_VERSION=3.24 \
+             -t nathapp/node-bun:22.23.4-1.4.4-alpine --push .
